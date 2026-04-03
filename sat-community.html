@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Community — SAT Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#F2EDE6;--bg2:#EDE4D9;--bg3:#E4D8C8;
+  --dark:#2C231A;--dark2:#4A3E33;--mid:#7B6B5A;
+  --light:#C4AE96;--pale:#D9CDBE;--accent:#C4854A;
+  --accent2:#E8C49A;--white:#FAF7F2;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--dark);display:flex;flex-direction:column;}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;background:var(--dark2);flex-shrink:0;z-index:10;}
+.logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--bg);text-decoration:none;}
+.logo span{color:var(--accent2);}
+.nav-links{display:flex;gap:16px;align-items:center;}
+.nav-link{font-size:13px;color:var(--light);text-decoration:none;cursor:pointer;transition:color .15s;}
+.nav-link:hover{color:var(--accent2);}
+.nav-link.active{color:var(--accent2);font-weight:500;}
+.avatar-sm{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;cursor:pointer;flex-shrink:0;}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:260px 1fr;height:calc(100vh - 56px);}
+
+/* LEFT PANEL */
+.left-panel{background:var(--bg2);border-right:1px solid var(--pale);display:flex;flex-direction:column;overflow:hidden;}
+.panel-tabs{display:flex;border-bottom:1px solid var(--pale);}
+.ptab{flex:1;padding:12px 8px;text-align:center;font-size:12px;font-weight:500;color:var(--mid);cursor:pointer;transition:all .15s;border-bottom:2px solid transparent;}
+.ptab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.panel-search{padding:12px 14px;border-bottom:1px solid var(--pale);}
+.panel-search input{width:100%;padding:8px 12px;border:1px solid var(--pale);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--dark);outline:none;}
+.panel-search input:focus{border-color:var(--accent);}
+.room-list{flex:1;overflow-y:auto;padding:8px 0;}
+.room-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .15s;position:relative;}
+.room-item:hover{background:var(--bg3);}
+.room-item.active{background:var(--bg3);}
+.room-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);border-radius:0 2px 2px 0;}
+.room-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;font-family:'Playfair Display',serif;}
+.room-info{flex:1;min-width:0;}
+.room-name{font-size:13px;font-weight:500;color:var(--dark2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.room-preview{font-size:11px;color:var(--mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.room-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.room-time{font-size:10px;color:var(--light);}
+.unread-badge{background:var(--accent);color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.panel-bottom{padding:12px 14px;border-top:1px solid var(--pale);}
+.btn-new{width:100%;background:var(--dark2);color:var(--white);border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;}
+.btn-new:hover{background:var(--accent);}
+
+/* RIGHT PANEL — CHAT */
+.chat-panel{display:flex;flex-direction:column;height:100%;background:var(--white);}
+.chat-header{padding:14px 20px;border-bottom:1px solid var(--pale);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--white);}
+.chat-header-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;font-family:'Playfair Display',serif;}
+.chat-header-info{}
+.chat-header-name{font-size:15px;font-weight:500;color:var(--dark2);}
+.chat-header-sub{font-size:12px;color:var(--mid);}
+.chat-header-actions{margin-left:auto;display:flex;gap:8px;}
+.hbtn{background:transparent;border:1px solid var(--pale);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:500;color:var(--mid);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.hbtn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* MESSAGES */
+.messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;}
+.msg{display:flex;gap:10px;max-width:70%;}
+.msg.mine{align-self:flex-end;flex-direction:row-reverse;}
+.msg-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;font-family:'Playfair Display',serif;}
+.msg-content{}
+.msg-name{font-size:11px;color:var(--mid);margin-bottom:3px;}
+.msg.mine .msg-name{text-align:right;}
+.msg-bubble{padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.55;color:var(--dark);}
+.msg:not(.mine) .msg-bubble{background:var(--bg2);border-radius:4px 14px 14px 14px;}
+.msg.mine .msg-bubble{background:var(--dark2);color:var(--white);border-radius:14px 4px 14px 14px;}
+.msg-time{font-size:10px;color:var(--light);margin-top:4px;}
+.msg.mine .msg-time{text-align:right;}
+.date-divider{text-align:center;font-size:11px;color:var(--light);padding:4px 0;position:relative;}
+.date-divider::before,.date-divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:var(--pale);}
+.date-divider::before{left:0;}
+.date-divider::after{right:0;}
+
+/* INPUT BAR */
+.input-bar{padding:14px 20px;border-top:1px solid var(--pale);display:flex;gap:10px;align-items:flex-end;background:var(--white);flex-shrink:0;}
+.msg-input{flex:1;padding:10px 14px;border:1.5px solid var(--pale);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--bg);outline:none;resize:none;max-height:100px;min-height:42px;transition:border-color .2s;line-height:1.5;}
+.msg-input:focus{border-color:var(--accent);}
+.send-btn{width:42px;height:42px;background:var(--dark2);border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;}
+.send-btn:hover{background:var(--accent);}
+.send-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* EMPTY STATE */
+.empty-chat{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--mid);}
+.empty-chat svg{width:48px;height:48px;stroke:var(--pale);fill:none;stroke-width:1.5;}
+.empty-chat-h{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--dark2);}
+.empty-chat-s{font-size:14px;color:var(--mid);font-weight:300;}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:200;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--white);border-radius:16px;padding:28px 32px;width:380px;max-width:94vw;}
+.modal h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--dark2);margin-bottom:6px;}
+.modal p{font-size:13px;color:var(--mid);margin-bottom:20px;font-weight:300;}
+.modal-field{margin-bottom:14px;}
+.modal-field label{display:block;font-size:12px;font-weight:500;color:var(--dark2);margin-bottom:5px;}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--pale);border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--bg);outline:none;transition:border-color .2s;}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--accent);}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+.btn-modal-primary{flex:1;background:var(--dark2);color:#fff;border:none;padding:11px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;}
+.btn-modal-primary:hover{background:var(--accent);}
+.btn-modal-cancel{flex:1;background:transparent;color:var(--mid);border:1.5px solid var(--pale);padding:11px;border-radius:8px;font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* COLOR AVATARS */
+.c0{background:#C4854A;}.c1{background:#4A3E33;}.c2{background:#3B6D11;}.c3{background:#185FA5;}.c4{background:#993556;}.c5{background:#0F6E56;}.c6{background:#854F0B;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--pale);border-radius:2px;}
+
+@media(max-width:680px){
+  .app{grid-template-columns:1fr;}
+  .left-panel{display:none;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="sat-dashboard.html" class="logo">S<span>AT</span></a>
+  <div class="nav-links">
+    <span class="nav-link" onclick="setTab('global')" id="nl-global">🌐 Global</span>
+    <span class="nav-link" onclick="setTab('groups')" id="nl-groups">👥 Groups</span>
+    <span class="nav-link" onclick="setTab('dms')" id="nl-dms">💬 Messages</span>
+    <a href="sat-dashboard.html" class="nav-link">← Dashboard</a>
+  </div>
+  <div class="avatar-sm" id="myAvatarNav">?</div>
+</nav>
+
+<div class="app">
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="panel-tabs">
+      <div class="ptab active" id="ptab-global" onclick="setTab('global')">Global</div>
+      <div class="ptab" id="ptab-groups" onclick="setTab('groups')">Groups</div>
+      <div class="ptab" id="ptab-dms" onclick="setTab('dms')">Messages</div>
+    </div>
+    <div class="panel-search"><input type="text" placeholder="Search..." id="searchInput" oninput="filterRooms()"/></div>
+    <div class="room-list" id="roomList"></div>
+    <div class="panel-bottom">
+      <button class="btn-new" id="newBtn" onclick="openNewModal()">+ New group</button>
+    </div>
+  </div>
+
+  <!-- CHAT PANEL -->
+  <div class="chat-panel" id="chatPanel">
+    <div class="empty-chat" id="emptyChat">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <div class="empty-chat-h">Welcome to Community</div>
+      <div class="empty-chat-s">Select a chat or start a new conversation</div>
+    </div>
+    <div id="activeChat" style="display:none;height:100%;display:none;flex-direction:column;">
+      <div class="chat-header" id="chatHeader"></div>
+      <div class="messages" id="messageList"></div>
+      <div class="input-bar">
+        <textarea class="msg-input" id="msgInput" placeholder="Type a message..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW GROUP MODAL -->
+<div class="modal-bg" id="newGroupModal">
+  <div class="modal">
+    <h3>Create a group</h3>
+    <p>Give your study group a name and invite friends by username.</p>
+    <div class="modal-field"><label>Group name</label><input type="text" id="groupName" placeholder="e.g. Math Study Squad"/></div>
+    <div class="modal-field"><label>Topic</label>
+      <select id="groupTopic">
+        <option>Math</option><option>Reading & Writing</option><option>Full SAT Prep</option><option>Test Strategies</option><option>General Chat</option>
+      </select>
+    </div>
+    <div class="modal-field"><label>Invite friends (comma-separated usernames)</label><input type="text" id="groupInvites" placeholder="e.g. james123, sarah_sat"/></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('newGroupModal')">Cancel</button>
+      <button class="btn-modal-primary" onclick="createGroup()">Create group</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW DM MODAL -->
+<div class="modal-bg" id="newDMModal">
+  <div class="modal">
+    <h3>New message</h3>
+    <p>Send a private message to another student.</p>
+    <div class="modal-field"><label>Username or name</label><input type="text" id="dmRecipient" placeholder="e.g. james123"/></div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal('newDMModal')">Cancel</button>
+      <button class="btn-modal-primary" onclick="createDM()">Start conversation</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Current user
+const user = JSON.parse(localStorage.getItem('sat_user') || '{}');
+const myName = user.name || user.firstName || 'Student';
+const myAvatar = user.avatar || myName[0] || 'S';
+document.getElementById('myAvatarNav').textContent = myAvatar;
+
+// Data store in localStorage
+function loadData() {
+  return JSON.parse(localStorage.getItem('sat_community') || JSON.stringify({
+    globalMessages: [],
+    groups: [],
+    dms: []
+  }));
+}
+function saveData(data) {
+  localStorage.setItem('sat_community', JSON.stringify(data));
+}
+
+// Seed some demo content if empty
+function seedData() {
+  let data = loadData();
+  if (data.globalMessages.length === 0) {
+    const now = new Date();
+    data.globalMessages = [
+      { id:1, author:'SAT Platform', avatar:'SP', color:'c0', text:'Welcome to the SAT Community! Ask questions, share tips, and support each other 🎉', time: new Date(now - 3600000*24).toISOString() },
+      { id:2, author:'James Rivera', avatar:'JR', color:'c1', text:'Hey everyone! Anyone else struggling with the quadratic questions in Math M2?', time: new Date(now - 3600000*2).toISOString() },
+      { id:3, author:'Sarah M.', avatar:'SM', color:'c2', text:'Yes! The key is to always check if you can factor first before using the formula. Saves so much time.', time: new Date(now - 3600000*1.5).toISOString() },
+      { id:4, author:'James Rivera', avatar:'JR', color:'c1', text:'Oh that makes sense! I was always jumping straight to the quadratic formula 😅', time: new Date(now - 3600000*1).toISOString() },
+      { id:5, author:'Aisha Khan', avatar:'AK', color:'c3', text:'For Reading & Writing, I recommend reading the question BEFORE the passage. Saves a lot of time!', time: new Date(now - 1800000).toISOString() },
+    ];
+    data.groups = [
+      { id:'g1', name:'Math Study Squad', topic:'Math', avatar:'MS', color:'c1', members:['James Rivera','Sarah M.','You'], messages:[
+        { id:1, author:'James Rivera', avatar:'JR', color:'c1', text:'Welcome to Math Study Squad! Let\'s crush this section together 💪', time: new Date(now - 7200000).toISOString() },
+        { id:2, author:'Sarah M.', avatar:'SM', color:'c2', text:'I just finished Math M1 — got 720! So happy 🎉', time: new Date(now - 3600000).toISOString() },
+      ]},
+      { id:'g2', name:'R&W Champions', topic:'Reading & Writing', avatar:'RW', color:'c5', members:['Aisha Khan','You'], messages:[
+        { id:1, author:'Aisha Khan', avatar:'AK', color:'c3', text:'Hey! I created this group for R&W practice tips. First tip: always eliminate answers that are too extreme!', time: new Date(now - 86400000).toISOString() },
+      ]},
+    ];
+    data.dms = [
+      { id:'dm1', with:'James Rivera', withAvatar:'JR', withColor:'c1', messages:[
+        { id:1, author:'James Rivera', avatar:'JR', color:'c1', text:'Hey! Did you finish the math module?', time: new Date(now - 7200000).toISOString() },
+        { id:2, author:myName, avatar:myAvatar, color:'c0', text:'Almost! Stuck on the exponential functions part.', time: new Date(now - 7000000).toISOString() },
+        { id:3, author:'James Rivera', avatar:'JR', color:'c1', text:'I can help! The key is to remember base × exponent rules. Want to study together?', time: new Date(now - 6800000).toISOString() },
+      ]},
+    ];
+    saveData(data);
+  }
+}
+
+seedData();
+
+// State
+let currentTab = 'global';
+let activeRoom = null;
+let activeRoomType = null;
+
+function setTab(tab) {
+  currentTab = tab;
+  ['global','groups','dms'].forEach(t => {
+    document.getElementById('ptab-'+t).classList.toggle('active', t===tab);
+    const nl = document.getElementById('nl-'+t);
+    if (nl) nl.classList.toggle('active', t===tab);
+  });
+  const btn = document.getElementById('newBtn');
+  if (tab === 'global')  { btn.textContent = '+ New message'; btn.onclick = () => openChat('global','global','global'); }
+  if (tab === 'groups')  { btn.textContent = '+ New group'; btn.onclick = openNewGroupModal; }
+  if (tab === 'dms')     { btn.textContent = '+ New message'; btn.onclick = openNewDMModal; }
+  renderRooms();
+}
+
+function renderRooms() {
+  const data = loadData();
+  const list = document.getElementById('roomList');
+  const search = document.getElementById('searchInput').value.toLowerCase();
+
+  if (currentTab === 'global') {
+    const msgs = data.globalMessages;
+    const last = msgs[msgs.length-1];
+    list.innerHTML = `
+      <div class="room-item active" onclick="openChat('global','global','global')">
+        <div class="room-avatar c0">🌐</div>
+        <div class="room-info">
+          <div class="room-name">Global Chat</div>
+          <div class="room-preview">${last ? last.author+': '+last.text : 'No messages yet'}</div>
+        </div>
+        <div class="room-meta"><div class="room-time">${last ? timeAgo(last.time) : ''}</div></div>
+      </div>`;
+  } else if (currentTab === 'groups') {
+    const groups = data.groups.filter(g => !search || g.name.toLowerCase().includes(search));
+    list.innerHTML = groups.map(g => {
+      const last = g.messages[g.messages.length-1];
+      return `<div class="room-item ${activeRoom===g.id?'active':''}" onclick="openChat('group','${g.id}','${g.name}')">
+        <div class="room-avatar ${g.color}">${g.avatar}</div>
+        <div class="room-info">
+          <div class="room-name">${g.name}</div>
+          <div class="room-preview">${last ? last.author+': '+last.text : 'No messages yet'}</div>
+        </div>
+        <div class="room-meta"><div class="room-time">${last ? timeAgo(last.time) : ''}</div><div class="room-preview" style="font-size:10px;color:var(--light)">${g.topic}</div></div>
+      </div>`;
+    }).join('') || '<div style="padding:20px;text-align:center;font-size:13px;color:var(--mid);">No groups yet. Create one!</div>';
+  } else {
+    const dms = data.dms.filter(d => !search || d.with.toLowerCase().includes(search));
+    list.innerHTML = dms.map(d => {
+      const last = d.messages[d.messages.length-1];
+      const isMe = last && last.author === myName;
+      return `<div class="room-item ${activeRoom===d.id?'active':''}" onclick="openChat('dm','${d.id}','${d.with}')">
+        <div class="room-avatar ${d.withColor}">${d.withAvatar}</div>
+        <div class="room-info">
+          <div class="room-name">${d.with}</div>
+          <div class="room-preview">${last ? (isMe?'You: ':'')+last.text : 'No messages yet'}</div>
+        </div>
+        <div class="room-meta"><div class="room-time">${last ? timeAgo(last.time) : ''}</div></div>
+      </div>`;
+    }).join('') || '<div style="padding:20px;text-align:center;font-size:13px;color:var(--mid);">No conversations yet.</div>';
+  }
+}
+
+function filterRooms() { renderRooms(); }
+
+function openChat(type, id, name) {
+  activeRoom = id;
+  activeRoomType = type;
+  document.getElementById('emptyChat').style.display = 'none';
+  const ac = document.getElementById('activeChat');
+  ac.style.display = 'flex';
+  ac.style.flexDirection = 'column';
+  ac.style.height = '100%';
+
+  const data = loadData();
+  let messages = [];
+  let color = 'c0';
+  let avatarTxt = '';
+  let sub = '';
+
+  if (type === 'global') {
+    messages = data.globalMessages;
+    color = 'c0'; avatarTxt = '🌐'; sub = `${messages.length} messages · open to all students`;
+  } else if (type === 'group') {
+    const g = data.groups.find(x=>x.id===id);
+    if (g) { messages = g.messages; color = g.color; avatarTxt = g.avatar; sub = g.topic+' · '+g.members.length+' members'; }
+  } else {
+    const d = data.dms.find(x=>x.id===id);
+    if (d) { messages = d.messages; color = d.withColor; avatarTxt = d.withAvatar; sub = 'Private conversation'; }
+  }
+
+  document.getElementById('chatHeader').innerHTML = `
+    <div class="chat-header-avatar ${color}">${avatarTxt}</div>
+    <div class="chat-header-info">
+      <div class="chat-header-name">${name}</div>
+      <div class="chat-header-sub">${sub}</div>
+    </div>
+    <div class="chat-header-actions">
+      ${type==='group'?'<button class="hbtn" onclick="showMembers()">Members</button>':''}
+    </div>`;
+
+  renderMessages(messages);
+  renderRooms();
+  document.getElementById('msgInput').focus();
+}
+
+function renderMessages(messages) {
+  const list = document.getElementById('messageList');
+  let lastDate = '';
+  list.innerHTML = messages.map(m => {
+    const d = new Date(m.time);
+    const dateStr = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    const dateDivider = dateStr !== lastDate ? `<div class="date-divider">${dateStr}</div>` : '';
+    lastDate = dateStr;
+    const isMe = m.author === myName;
+
+    // Format question shares specially
+    let bubbleContent = escHtml(m.text);
+    if (m.isQuestion || m.text.includes('📚 *Question')) {
+      const lines = m.text.split('\n');
+      const parts = lines.map((line, i) => {
+        if (line.startsWith('📚 *') && line.endsWith('*')) {
+          return `<div style="font-size:12px;font-weight:600;opacity:0.8;margin-bottom:6px;">${escHtml(line.replace(/\*/g,''))}</div>`;
+        } else if (line.startsWith('💬 ')) {
+          return `<div style="font-size:13px;font-style:italic;opacity:0.85;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.15);">${escHtml(line)}</div>`;
+        } else if (/^[A-D]\. /.test(line)) {
+          return `<div style="font-size:13px;padding:3px 0;">${escHtml(line)}</div>`;
+        } else if (line === '') {
+          return '<div style="height:4px;"></div>';
+        }
+        return `<div style="font-size:14px;">${escHtml(line)}</div>`;
+      }).join('');
+      bubbleContent = `<div style="border-left:3px solid rgba(255,255,255,0.3);padding-left:10px;">${parts}</div>
+        <a href="sat-practice.html" style="display:inline-block;margin-top:10px;font-size:12px;font-weight:500;color:${isMe?'#E8C49A':'#C4854A'};text-decoration:none;">Go to practice →</a>`;
+    }
+
+    return dateDivider + `
+      <div class="msg ${isMe?'mine':''}">
+        <div class="msg-avatar ${m.color||'c0'}">${m.avatar||m.author[0]}</div>
+        <div class="msg-content">
+          ${!isMe?`<div class="msg-name">${m.author}</div>`:''}
+          <div class="msg-bubble">${bubbleContent}</div>
+          <div class="msg-time">${formatTime(m.time)}</div>
+        </div>
+      </div>`;
+  }).join('');
+  list.scrollTop = list.scrollHeight;
+}
+
+function sendMessage() {
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if (!text || !activeRoom) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  const data = loadData();
+  const msg = { id: Date.now(), author: myName, avatar: myAvatar, color: 'c0', text, time: new Date().toISOString() };
+
+  if (activeRoomType === 'global') {
+    data.globalMessages.push(msg);
+  } else if (activeRoomType === 'group') {
+    const g = data.groups.find(x=>x.id===activeRoom);
+    if (g) g.messages.push(msg);
+  } else {
+    const d = data.dms.find(x=>x.id===activeRoom);
+    if (d) d.messages.push(msg);
+  }
+
+  saveData(data);
+  const allMsgs = activeRoomType==='global' ? data.globalMessages
+    : activeRoomType==='group' ? data.groups.find(x=>x.id===activeRoom)?.messages || []
+    : data.dms.find(x=>x.id===activeRoom)?.messages || [];
+  renderMessages(allMsgs);
+  renderRooms();
+}
+
+function handleKey(e) {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// Group modal
+function openNewGroupModal() { document.getElementById('newGroupModal').classList.add('show'); }
+function openNewDMModal()    { document.getElementById('newDMModal').classList.add('show'); }
+function closeModal(id)      { document.getElementById(id).classList.remove('show'); }
+
+function createGroup() {
+  const name = document.getElementById('groupName').value.trim();
+  if (!name) return;
+  const topic = document.getElementById('groupTopic').value;
+  const invites = document.getElementById('groupInvites').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const data = loadData();
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  const colors = ['c0','c1','c2','c3','c4','c5','c6'];
+  const color = colors[data.groups.length % colors.length];
+  const group = {
+    id: 'g'+Date.now(),
+    name, topic,
+    avatar: initials,
+    color,
+    members: [myName, ...invites],
+    messages: [{ id:1, author:myName, avatar:myAvatar, color:'c0', text:`${myName} created the group "${name}" 🎉`, time: new Date().toISOString() }]
+  };
+  data.groups.push(group);
+  saveData(data);
+  closeModal('newGroupModal');
+  document.getElementById('groupName').value = '';
+  document.getElementById('groupInvites').value = '';
+  setTab('groups');
+  openChat('group', group.id, group.name);
+}
+
+function createDM() {
+  const recipient = document.getElementById('dmRecipient').value.trim();
+  if (!recipient) return;
+  const data = loadData();
+  // Check if DM already exists
+  const existing = data.dms.find(d => d.with.toLowerCase() === recipient.toLowerCase());
+  if (existing) { closeModal('newDMModal'); openChat('dm', existing.id, existing.with); return; }
+  const initials = recipient.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) || recipient.slice(0,2).toUpperCase();
+  const colors = ['c1','c2','c3','c4','c5','c6'];
+  const color = colors[data.dms.length % colors.length];
+  const dm = {
+    id: 'dm'+Date.now(),
+    with: recipient,
+    withAvatar: initials,
+    withColor: color,
+    messages: []
+  };
+  data.dms.push(dm);
+  saveData(data);
+  closeModal('newDMModal');
+  document.getElementById('dmRecipient').value = '';
+  setTab('dms');
+  openChat('dm', dm.id, dm.with);
+}
+
+function showMembers() {
+  const data = loadData();
+  const g = data.groups.find(x=>x.id===activeRoom);
+  if (!g) return;
+  alert('Members:\n' + g.members.join('\n'));
+}
+
+// Utils
+function timeAgo(iso) {
+  const diff = (Date.now() - new Date(iso)) / 1000;
+  if (diff < 60)   return 'now';
+  if (diff < 3600) return Math.floor(diff/60)+'m ago';
+  if (diff < 86400)return Math.floor(diff/3600)+'h ago';
+  return Math.floor(diff/86400)+'d ago';
+}
+function formatTime(iso) {
+  return new Date(iso).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// Init
+setTab('global');
+openChat('global','global','Global Chat');
+</script>
+</body>
+</html>
